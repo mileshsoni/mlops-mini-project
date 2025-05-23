@@ -35,7 +35,7 @@ logger.addHandler(console_handler)
 logger.addHandler(file_handler)
 
 def load_model(file_path: str):
-    """Load the trained model from a file."""
+    """Load the trained model """
     try:
         with open(file_path, 'rb') as file:
             model = pickle.load(file)

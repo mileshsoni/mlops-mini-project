@@ -1,4 +1,4 @@
 [core]
-    remote = myremote
-['remote "myremote"']
-    url = C:\Users\miles\AppData\Local\Temp
+    remote = dvcstore
+['remote "dvcstore"']
+    url = s3://ms-mlops-project-bucket

@@ -31,7 +31,7 @@ nltk.download('wordnet')
 nltk.download('stopwords')
 
 def lemmatization(text):
-    """Lemmatize the text."""
+    """Lemmatize the text"""
     lemmatizer = WordNetLemmatizer()
     text = text.split()
     text = [lemmatizer.lemmatize(word) for word in text]

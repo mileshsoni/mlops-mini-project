@@ -31,7 +31,7 @@ def promote_model():
         pass
     
     # Get the latest version in staging
-    latest_version_staging = client.get_model_version_by_alias(name="my_model", alias="staging").version
+    latest_version_staging = client.get_model_version_by_alias(name="my_model", alias="Staging").version
     
     client.set_registered_model_alias(model_name, 'Production', latest_version_staging)
     

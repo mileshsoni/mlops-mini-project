@@ -3,9 +3,21 @@ from preprocessing_utility import normalize_text
 import mlflow
 import dagshub
 import pickle
+import os
+import pandas as pd
+dagshub_token = os.getenv("DAGSHUB_PAT")
+if not dagshub_token:
+    raise EnvironmentError("DAGSHUB_PAT environment variable is not set")
 
-mlflow.set_tracking_uri('https://dagshub.com/mileshsoni/mlops-mini-project.mlflow')
-dagshub.init(repo_owner='mileshsoni', repo_name='mlops-mini-project', mlflow=True)
+os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+
+dagshub_url = "https://dagshub.com"
+repo_owner = "mileshsoni"
+repo_name = "mlops-mini-project"
+
+# Set up MLflow tracking URI
+mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
 
 app = Flask(__name__)
 
@@ -19,6 +31,7 @@ def get_latest_model(model_name, alias):
 
 model = get_latest_model(model_name, alias)
 vectorizer = pickle.load(open('models/vectorizer.pkl', 'rb'))
+
 @app.route('/')
 def home ():
     return render_template('index.html', result=None)
@@ -30,8 +43,11 @@ def predict():
     text = normalize_text(text)
     # apply bow
     features = vectorizer.transform([text])
-    # final prediction
     
+    # convert sparse matrix to dataFrame
+    features_df = pd.DataFrame.sparse.from_matrix(features)
+    features_df = pd.DataFrame(features.to_array(), columns = [str(i) for i in range(features.shape[1])])
+    # final prediction
     result= model.predict(features)
     print(result)
     return render_template('index.html', result=result[0])

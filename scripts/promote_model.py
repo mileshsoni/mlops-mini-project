@@ -25,7 +25,7 @@ def promote_model():
     
     # get the latest version in production and move it to archived
     try:
-        latest_mv = client.get_latest_versions(model_name, stages=['Production'])[0]
+        latest_mv = client.get_model_version_by_alias(name="my_model", alias="Production")
         client.set_registered_model_alias(model_name, 'Archived', latest_mv.version)
     except:
         pass

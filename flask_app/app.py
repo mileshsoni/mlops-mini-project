@@ -5,6 +5,7 @@ import dagshub
 import pickle
 import os
 import pandas as pd
+
 dagshub_token = os.getenv("DAGSHUB_PAT")
 if not dagshub_token:
     raise EnvironmentError("DAGSHUB_PAT environment variable is not set")
@@ -30,7 +31,7 @@ def get_latest_model(model_name, alias):
     return mlflow.pyfunc.load_model(f"models:/{model_name}@{alias}")
 
 model = get_latest_model(model_name, alias)
-vectorizer = pickle.load(open('models/vectorizer.pkl', 'rb'))
+vectorizer = pickle.load(open('./models/vectorizer.pkl', 'rb'))
 
 @app.route('/')
 def home ():
@@ -44,12 +45,13 @@ def predict():
     # apply bow
     features = vectorizer.transform([text])
     
-    # convert sparse matrix to dataFrame
-    features_df = pd.DataFrame.sparse.from_matrix(features)
-    features_df = pd.DataFrame(features.to_array(), columns = [str(i) for i in range(features.shape[1])])
+    # Convert sparse matrix to DataFrame
+    features_df = pd.DataFrame.sparse.from_spmatrix(features)
+    features_df = pd.DataFrame(features.toarray(), columns=[str(i) for i in range(features.shape[1])])
+    
     # final prediction
     result= model.predict(features)
-    print(result)
+    
     return render_template('index.html', result=result[0])
 
 app.run(debug=True)

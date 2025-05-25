@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from .preprocessing_utility import normalize_text
+from preprocessing_utility import normalize_text
 import mlflow
 import dagshub
 import pickle
@@ -55,4 +55,6 @@ def predict():
     return render_template('index.html', result=result[0])
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host = '0.0.0.0')
+    
+    

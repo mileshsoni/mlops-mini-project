@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from .preprocessing_utility import normalize_text
+from preprocessing_utility import normalize_text
 import mlflow
 import dagshub
 import pickle

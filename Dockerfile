@@ -6,6 +6,7 @@ COPY flask_app /app/flask_app
 
 COPY models/vectorizer.pkl /app/models/vectorizer.pkl
 
+COPY requirements.txt /app/requirements.txt
 RUN pip install -r requirements.txt
 
 RUN python -m nltk.downloader stopwords wordnet

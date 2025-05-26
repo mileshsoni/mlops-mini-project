@@ -9,6 +9,7 @@ from nltk.stem import WordNetLemmatizer
 import re
 import string
 
+# dagshub authentication
 dagshub_token = os.getenv("DAGSHUB_PAT")
 if not dagshub_token:
     raise EnvironmentError("DAGSHUB_PAT environment variable is not set")

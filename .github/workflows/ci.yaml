@@ -7,20 +7,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:  
+
       - name: checkout code
         uses: actions/checkout@v3
+
       - name: setup python
         uses: actions/setup-python@v2
         with: 
           python-version: '3.11'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: install dependencies
         run: |
           pip install -r requirements.txt
+
       - name: run pipeline
         env:
           DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
         run: |
           dvc repro
+
       - name: run model tests
         env: 
           DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
@@ -38,38 +51,6 @@ jobs:
         env:
           DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
         run: python -m unittest tests/test_flask_app.py
-
-      - name: Login to Docker Hub
-        if: success()
-        uses: docker/login-action@v2
-        with: 
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
-      - name: Build Docker Image
-        if: success()
-        run: |
-          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/emotion4:latest .
-
-      - name: Push Docker image to Docker Hub
-        if: success()
-        run: |
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/emotion4:latest
-
-      - name: Deploy to EC2
-        if: success()
-        uses: appleboy/ssh-action@v0.1.5
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/emotion4:latest
-            docker stop my-app || true
-            docker rm my-app || true
-            docker run -d -p 80:5000 --name my-app \
-              -e DAGSHUB_PAT=${{ secrets.DAGSHUB_PAT }} \
-              ${{ secrets.DOCKER_HUB_USERNAME }}/emotion4:latest
 
       - name: Login to AWS ECR
         if: success()

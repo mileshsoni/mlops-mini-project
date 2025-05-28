@@ -1,31 +1,37 @@
-# stage-1 : Build Stage
+# Stage 1: Build stage
 FROM python:3.11 AS build
 
 WORKDIR /app
 
-# copy the requirements.txt file from the flask_app folder
-COPY flask_app/requirements.txt /app/
-
-# install dependencies
+# Copy and install requirements
+COPY flask_app/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# copy the application code and model files
+# Copy app code and model
 COPY flask_app/ /app/
 COPY models/vectorizer.pkl /app/models/vectorizer.pkl
 
-# download only the necessary NLTK data
+# Download NLTK data
 RUN python -m nltk.downloader stopwords wordnet
 
-# stage - 2: Final Stage
+
+# Stage 2: Final minimal image
 FROM python:3.11-slim AS final
 
-WORKDIR /application
+WORKDIR /app
 
-# copy only the necessary files from the build stage
-COPY --from=build /app /app
+# Install dependencies again in final image
+COPY flask_app/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# expose the application port
+# Copy application and models
+COPY flask_app/ /app/
+COPY models/vectorizer.pkl /app/models/vectorizer.pkl
+
+# Download NLTK data again
+RUN python -m nltk.downloader stopwords wordnet
+
 EXPOSE 5000
 
-# set the command to run the application
+# Start app
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "120", "app:app"]
